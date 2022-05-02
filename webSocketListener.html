@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+<body>
+<script src="https://www.bitcoin.de/js/socket.io.min.js"></script>
+<script>
+// Script https://www.bitcoin.de/js/socket.io.min.js needs to be included in the first place to get access to variable io
+var d = new Date();
+document.write(d.getTime());
+if (typeof io != 'undefined') {
+    var socket = io.connect('https://ws.bitcoin.de', {port: 443});
+
+    if (typeof socket != 'undefined') {
+        socket.on('connect', function () {
+            // Connection has successfully been established.
+            // Do some initialization stuff here.
+            document.write("Connection successful");
+        });
+
+        socket.on('disconnect', function () {
+            document.write("disconnected");
+        });
+
+        // An order has been removed from the orderbook
+        socket.on('remove_order', function (order) {
+            if (order.trading_pair == "etheur") {
+                // Variable order contains the element order_id
+                document.write("remove_order sent to function");
+                addToURL('remove_order', order);
+            }
+        });
+
+        // A new order has been added to the orderbook
+        socket.on('add_order', function (order) {
+            if (order.trading_pair == "etheur") {
+                // Variable order contains all above listed elements (i.e. order_id, order_type)
+                document.write("add_order sent to function");
+                addToURL('add_order', order);
+            }
+        });
+    }
+}
+
+function addToURL(event_type, order) {
+      var query_string = "#_event_type=" + event_type + "&order_type=" + order.order_type + "&order_id=" + order.order_id + "&price=" + order.price + "&amount=" + order.amount + "&min_amount=" + order.min_amount + "&trading_pair=" + order.trading_pair + "&payment_option=" + order.payment_option;
+      window.location = query_string;
+}
+</script>
+</body>
+</html>
